@@ -1,6 +1,6 @@
 # ab-test-significance-toolkit
 
-![license](https://img.shields.io/badge/license-MIT-blue) ![python](https://img.shields.io/badge/python-3.10%2B-blue) [![tests](https://img.shields.io/badge/tests-20%20passing-brightgreen?logo=pytest&logoColor=white)](tests/) ![made-with](https://img.shields.io/badge/made%20with-scipy%20%2B%20jinja2-green)
+![license](https://img.shields.io/badge/license-MIT-blue) ![python](https://img.shields.io/badge/python-3.10%2B-blue) [![CI](https://github.com/mehranmoghadasi/ab-test-significance-toolkit/actions/workflows/python-app.yml/badge.svg)](https://github.com/mehranmoghadasi/ab-test-significance-toolkit/actions/workflows/python-app.yml) ![made-with](https://img.shields.io/badge/made%20with-scipy%20%2B%20jinja2-green)
 
 > An agency-grade A/B test analyzer — Bayesian + Frequentist + Sequential significance, revenue uplift, GA4 export ingest, and exec-ready HTML reports in a single CLI.
 
@@ -183,7 +183,7 @@ ab-test-significance-toolkit/
 │   ├── test_frequentist.py
 │   ├── test_bayesian.py
 │   └── test_sequential.py
-├── ci/python-app.yml         # GitHub Actions workflow (copy to .github/workflows/)
+├── ci/python-app.yml         # GitHub Actions workflow (also installed at .github/workflows/)
 ├── docs/
 │   ├── ARCHITECTURE.md
 │   ├── USAGE.md
