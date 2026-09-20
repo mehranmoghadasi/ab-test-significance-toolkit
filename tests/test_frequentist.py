@@ -5,8 +5,8 @@ import pytest
 
 from ab_test_toolkit.frequentist import (
     VariantSummary,
-    two_proportion_z_test,
     required_sample_size_proportion,
+    two_proportion_z_test,
     welch_t_test,
 )
 

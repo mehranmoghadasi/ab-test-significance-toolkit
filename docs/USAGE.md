@@ -48,7 +48,7 @@ Pulling counts daily from the data warehouse? Use `peek` instead of running
 abtest peek \
   --c-visitors 14250 --c-conv 567 \
   --t-visitors 14180 --t-conv 671 \
-  --tau-squared 1.0
+  --tau 0.01        # prior SD of the absolute lift; 0.01 = one percentage point
 ```
 
 This returns an always-valid p-value that does not inflate Type-I error when

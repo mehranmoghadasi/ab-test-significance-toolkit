@@ -5,9 +5,9 @@ import pytest
 from ab_test_toolkit.bayesian import (
     BayesianPrior,
     analyze,
-    update_posterior,
     credible_interval,
     decision_threshold_loss,
+    update_posterior,
 )
 
 
