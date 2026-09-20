@@ -153,7 +153,7 @@ def _classify_recommendation(freq_significant: bool, bayes_prob: float, sequenti
             "amber",
             "Evidence is suggestive but not unanimous. Confirm with a holdout or sequential peek.",
         )
-    if sequential_decision == "no-effect-likely" or bayes_prob < 0.6:
+    if bayes_prob < 0.6:
         return ("KILL TREATMENT", "red", "Little evidence treatment beats control. Move on.")
     return ("KEEP TESTING", "amber", "Insufficient data. Continue running to reach the target sample size.")
 

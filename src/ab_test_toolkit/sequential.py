@@ -95,12 +95,13 @@ def always_valid_p_value(
     # Always-valid p-value = min(1, 1/Lambda); computed in the log domain.
     av_p = 1.0 if log_lambda <= 0 else exp(-log_lambda)
 
+    # An always-valid p-value can only ever reject H0; a large value means "not enough
+    # evidence yet", never "no effect" (that needs a futility bound, which this test
+    # does not provide). So there are exactly three honest decisions.
     if av_p < 0.01:
         decision = "ship"
     elif av_p < 0.05:
         decision = "lean-ship"
-    elif av_p > 0.5:
-        decision = "no-effect-likely"
     else:
         decision = "keep-collecting"
 

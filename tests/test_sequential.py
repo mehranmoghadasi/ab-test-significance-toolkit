@@ -16,7 +16,7 @@ def test_always_valid_no_effect():
     )
     res = always_valid_p_value(snap)
     assert res.always_valid_p_value > 0.5
-    assert res.decision in ("keep-collecting", "no-effect-likely")
+    assert res.decision == "keep-collecting"
 
 
 def test_always_valid_strong_effect():
