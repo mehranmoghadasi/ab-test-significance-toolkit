@@ -1,11 +1,11 @@
 """ab_test_toolkit — Bayesian + Frequentist + Sequential A/B test analyzer for marketers."""
 
-__version__ = "0.2.0"
+__version__ = "0.3.0"
 __all__ = [
-    "frequentist",
     "bayesian",
-    "sequential",
-    "revenue",
+    "frequentist",
     "ga4_loader",
     "report",
+    "revenue",
+    "sequential",
 ]

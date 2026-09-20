@@ -4,11 +4,11 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "ab-test-significance-toolkit"
-version = "0.2.0"
+version = "0.3.0"
 description = "Agency-grade A/B test analyzer: Bayesian + Frequentist + Sequential significance, revenue impact, GA4 ingest, HTML exec reports."
 readme = "README.md"
 license = {file = "LICENSE"}
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 authors = [{name = "Mehran Moghadasi"}]
 keywords = ["ab-testing", "conversion-rate-optimization", "cro", "bayesian", "frequentist", "marketing", "experimentation"]
 classifiers = [
@@ -40,4 +40,4 @@ where = ["src"]
 
 [tool.ruff]
 line-length = 100
-target-version = "py39"
+target-version = "py310"

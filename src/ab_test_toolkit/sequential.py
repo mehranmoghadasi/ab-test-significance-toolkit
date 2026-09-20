@@ -12,10 +12,7 @@ Sequential Analysis to A/B Testing."
 from __future__ import annotations
 
 from dataclasses import dataclass
-from math import sqrt, log, pi, exp
-from typing import List
-
-from scipy import stats
+from math import exp, log, sqrt
 
 
 @dataclass
@@ -37,18 +34,37 @@ class SequentialResult:
     tau_squared: float
 
 
+DEFAULT_TAU = 0.01  # prior SD on the absolute lift: 1 percentage point
+
+
 def always_valid_p_value(
     snapshot: SequentialSnapshot,
-    tau_squared: float = 1.0,
+    tau_squared: float = DEFAULT_TAU**2,
 ) -> SequentialResult:
     """Compute an always-valid p-value using a Gaussian mSPRT.
 
+    The mixture likelihood ratio for a two-sample difference in proportions
+    ``theta_hat = p_t - p_c`` with a ``N(0, tau^2)`` prior on the true lift is
+
+        Lambda_n = sqrt(sigma^2 / (sigma^2 + n*tau^2))
+                   * exp( n^2 * tau^2 * theta_hat^2 / (2 * sigma^2 * (sigma^2 + n*tau^2)) )
+
+    where ``sigma^2`` is the per-observation variance ``p(1-p)`` and ``n`` is the
+    effective sample size ``1 / (1/n_c + 1/n_t)`` (so that ``sigma^2 / n`` equals
+    the variance of ``theta_hat``). Substituting ``theta_hat^2 = z^2 * sigma^2 / n``
+    gives the bounded, overflow-safe form used below:
+
+        log Lambda_n = 0.5 * log(sigma^2 / (sigma^2 + n*tau^2))
+                       + n * tau^2 * z^2 / (2 * (sigma^2 + n*tau^2))
+
+    The always-valid p-value is ``min(1, 1 / Lambda_n)``.
+
     Args:
         snapshot: Cumulative counts at the moment of the peek.
-        tau_squared: Variance of the Gaussian mixing distribution over the alternative
-            effect. Larger tau_squared = better power against larger effects, weaker
-            against small effects. 1.0 is a reasonable default for proportion tests
-            with the lift measured in standard-deviation units.
+        tau_squared: Prior variance of the absolute lift (conversion-rate units).
+            The default corresponds to a prior SD of one percentage point, which is
+            a sensible scale for most web conversion rates. Larger values give more
+            power against big lifts and less against small ones.
 
     Returns:
         SequentialResult with the always-valid p-value and a decision string.
@@ -57,29 +73,27 @@ def always_valid_p_value(
     n_t = snapshot.visitors_treatment
     if n_c < 1 or n_t < 1:
         raise ValueError("Both arms must have at least 1 visitor.")
+    if tau_squared <= 0:
+        raise ValueError("tau_squared must be positive.")
 
     p_c = snapshot.conversions_control / n_c
     p_t = snapshot.conversions_treatment / n_t
 
     p_pool = (snapshot.conversions_control + snapshot.conversions_treatment) / (n_c + n_t)
-    se = sqrt(p_pool * (1 - p_pool) * (1 / n_c + 1 / n_t))
-    if se == 0:
-        z = 0.0
+    sigma_sq = p_pool * (1 - p_pool)  # per-observation variance under H0
+    n_eff = 1.0 / (1.0 / n_c + 1.0 / n_t)
+    se = sqrt(sigma_sq / n_eff) if sigma_sq > 0 else 0.0
+    z = (p_t - p_c) / se if se > 0 else 0.0
+
+    if sigma_sq == 0:
+        # No variance at all (0% or 100% in both arms) -> nothing to learn yet.
+        log_lambda = 0.0
     else:
-        z = (p_t - p_c) / se
+        denom = sigma_sq + n_eff * tau_squared
+        log_lambda = 0.5 * log(sigma_sq / denom) + (n_eff * tau_squared * z * z) / (2.0 * denom)
 
-    n = n_c + n_t  # effective sample
-    # mSPRT statistic with N(0, tau^2) mixing prior on the effect:
-    # m_n = sqrt(V / (V + n*tau^2)) * exp( n^2 * tau^2 * z^2 / (2 * V * (V + n*tau^2)) )
-    # with V = 1 under standardized z. We work in the log domain for stability.
-    V = 1.0
-    log_msprt = 0.5 * (log(V) - log(V + n * tau_squared)) + (
-        (n * n * tau_squared * z * z) / (2.0 * V * (V + n * tau_squared))
-    )
-    msprt = exp(log_msprt)
-
-    # Always-valid p-value: min(1, 1/msprt), clipped to [0,1].
-    av_p = min(1.0, 1.0 / msprt) if msprt > 0 else 1.0
+    # Always-valid p-value = min(1, 1/Lambda); computed in the log domain.
+    av_p = 1.0 if log_lambda <= 0 else exp(-log_lambda)
 
     if av_p < 0.01:
         decision = "ship"
@@ -93,7 +107,7 @@ def always_valid_p_value(
     return SequentialResult(
         always_valid_p_value=av_p,
         decision=decision,
-        cumulative_visitors=n,
+        cumulative_visitors=n_c + n_t,
         z_statistic=z,
         tau_squared=tau_squared,
     )
@@ -118,7 +132,7 @@ def peeking_correction_factor(num_peeks: int, alpha: float = 0.05) -> float:
     return alpha / num_peeks
 
 
-def run_sequence(snapshots: List[SequentialSnapshot], tau_squared: float = 1.0):
+def run_sequence(snapshots: list[SequentialSnapshot], tau_squared: float = DEFAULT_TAU**2):
     """Replay a sequence of peeks. Useful for plotting decision trajectories."""
     out = []
     for snap in snapshots:

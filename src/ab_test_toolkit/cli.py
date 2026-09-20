@@ -10,7 +10,6 @@ from __future__ import annotations
 
 import json
 import sys
-from pathlib import Path
 
 import click
 from rich.console import Console
@@ -19,15 +18,13 @@ from rich.table import Table
 from . import __version__
 from .bayesian import analyze as bayes_analyze
 from .frequentist import (
-    two_proportion_z_test,
     required_sample_size_proportion,
-    VariantSummary,
+    two_proportion_z_test,
 )
 from .ga4_loader import load_ga4_csv, select_pair
 from .report import render_report, write_report
 from .revenue import revenue_per_visitor_delta
 from .sequential import SequentialSnapshot, always_valid_p_value
-
 
 console = Console()
 
@@ -64,15 +61,15 @@ def sample_size_cmd(baseline, mde, alpha, power, absolute):
 @click.option("--c-conv", type=int, required=True)
 @click.option("--t-visitors", type=int, required=True)
 @click.option("--t-conv", type=int, required=True)
-@click.option("--tau-squared", type=float, default=1.0, show_default=True)
-def peek_cmd(c_visitors, c_conv, t_visitors, t_conv, tau_squared):
+@click.option("--tau", type=float, default=0.01, show_default=True, help="Prior SD of the absolute lift (0.01 = 1 percentage point)")
+def peek_cmd(c_visitors, c_conv, t_visitors, t_conv, tau):
     snap = SequentialSnapshot(
         visitors_control=c_visitors,
         conversions_control=c_conv,
         visitors_treatment=t_visitors,
         conversions_treatment=t_conv,
     )
-    res = always_valid_p_value(snap, tau_squared=tau_squared)
+    res = always_valid_p_value(snap, tau_squared=tau * tau)
     table = Table(title="Sequential analysis")
     table.add_column("metric")
     table.add_column("value")
@@ -153,7 +150,7 @@ def analyze_cmd(csv_path, control_name, treatment_name, out_path, client_name,
 @click.option("--treatment", "treatment_name", required=True)
 def json_cmd(csv_path, control_name, treatment_name):
     exp = load_ga4_csv(csv_path, control_variant=control_name)
-    control, treatment, c_rev, t_rev = select_pair(exp, control_name, treatment_name)
+    control, treatment, _c_rev, _t_rev = select_pair(exp, control_name, treatment_name)
     freq = two_proportion_z_test(control, treatment)
     bayes = bayes_analyze(
         control_conversions=control.conversions,

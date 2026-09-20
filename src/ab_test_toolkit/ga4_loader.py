@@ -19,13 +19,11 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Dict, List, Optional
 
 import numpy as np
 import pandas as pd
 
 from .frequentist import VariantSummary
-
 
 DEFAULT_COLUMN_MAP = {
     "variant": "experiment_variant",
@@ -37,15 +35,15 @@ DEFAULT_COLUMN_MAP = {
 
 @dataclass
 class LoadedExperiment:
-    variant_summaries: Dict[str, VariantSummary]
-    revenue_by_variant: Dict[str, np.ndarray]
+    variant_summaries: dict[str, VariantSummary]
+    revenue_by_variant: dict[str, np.ndarray]
     raw_df: pd.DataFrame
-    column_map: Dict[str, str]
+    column_map: dict[str, str]
 
 
 def load_ga4_csv(
     path: str | Path,
-    column_map: Optional[Dict[str, str]] = None,
+    column_map: dict[str, str] | None = None,
     control_variant: str = "control",
 ) -> LoadedExperiment:
     """Load a GA4 export CSV into experiment-ready structures.
@@ -81,13 +79,13 @@ def load_ga4_csv(
     df[converted_col] = pd.to_numeric(df[converted_col], errors="coerce").fillna(0).astype(int)
     df[revenue_col] = pd.to_numeric(df[revenue_col], errors="coerce").fillna(0.0)
 
-    summaries: Dict[str, VariantSummary] = {}
-    revenues: Dict[str, np.ndarray] = {}
+    summaries: dict[str, VariantSummary] = {}
+    revenues: dict[str, np.ndarray] = {}
 
     for variant_name, sub in df.groupby(variant_col):
         summaries[str(variant_name)] = VariantSummary(
             name=str(variant_name),
-            visitors=int(len(sub)),
+            visitors=len(sub),
             conversions=int(sub[converted_col].sum()),
         )
         revenues[str(variant_name)] = sub[revenue_col].to_numpy()

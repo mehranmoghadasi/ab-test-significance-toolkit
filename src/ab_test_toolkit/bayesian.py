@@ -8,8 +8,7 @@ Provides:
 
 from __future__ import annotations
 
-from dataclasses import dataclass, asdict
-from typing import Tuple
+from dataclasses import asdict, dataclass
 
 import numpy as np
 from scipy import stats
@@ -28,9 +27,9 @@ class BayesianResult:
     prob_treatment_beats_control: float
     expected_uplift_absolute: float
     expected_uplift_relative: float
-    credible_interval_control: Tuple[float, float]
-    credible_interval_treatment: Tuple[float, float]
-    credible_interval_uplift_abs: Tuple[float, float]
+    credible_interval_control: tuple[float, float]
+    credible_interval_treatment: tuple[float, float]
+    credible_interval_uplift_abs: tuple[float, float]
     expected_loss_choosing_treatment: float
     expected_loss_choosing_control: float
     samples_drawn: int
@@ -61,7 +60,7 @@ def update_posterior(prior: BayesianPrior, conversions: int, visitors: int) -> B
     )
 
 
-def credible_interval(prior: BayesianPrior, level: float = 0.95) -> Tuple[float, float]:
+def credible_interval(prior: BayesianPrior, level: float = 0.95) -> tuple[float, float]:
     """Equal-tailed credible interval for a Beta distribution."""
     lower = (1.0 - level) / 2.0
     upper = 1.0 - lower
@@ -75,7 +74,7 @@ def analyze(
     control_visitors: int,
     treatment_conversions: int,
     treatment_visitors: int,
-    prior: BayesianPrior = BayesianPrior(),
+    prior: BayesianPrior | None = None,
     samples: int = 100_000,
     seed: int = 42,
 ) -> BayesianResult:
@@ -93,6 +92,7 @@ def analyze(
     Returns:
         BayesianResult with probabilities, credible intervals, and expected losses.
     """
+    prior = prior or BayesianPrior()
     if samples < 1000:
         raise ValueError("samples must be >= 1000 for stable estimates.")
 

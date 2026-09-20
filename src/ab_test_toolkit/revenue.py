@@ -11,9 +11,8 @@ Inputs accept GA4-style per-session revenue arrays.
 
 from __future__ import annotations
 
-from dataclasses import dataclass, asdict
+from dataclasses import asdict, dataclass
 from math import sqrt
-from typing import Optional
 
 import numpy as np
 

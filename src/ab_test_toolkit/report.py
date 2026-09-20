@@ -8,12 +8,10 @@ can be emailed or printed to PDF without further work.
 from __future__ import annotations
 
 from dataclasses import asdict
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
-from typing import Optional
 
-from jinja2 import Environment, DictLoader, select_autoescape
-
+from jinja2 import DictLoader, Environment, select_autoescape
 
 REPORT_TEMPLATE = """\
 <!doctype html>
@@ -116,8 +114,8 @@ REPORT_TEMPLATE = """\
       <td>${{ "%+.4f"|format(revenue.rpv_diff) }}
           (95% CI ${{ "%+.4f"|format(revenue.rpv_diff_ci95[0]) }} to ${{ "%+.4f"|format(revenue.rpv_diff_ci95[1]) }})</td></tr>
   <tr><th>Annualized impact</th>
-      <td>${{ "{:,.0f}"|format(revenue.annualized_impact) }}
-          (range ${{ "{:,.0f}"|format(revenue.annualized_impact_low) }} to ${{ "{:,.0f}"|format(revenue.annualized_impact_high) }})</td></tr>
+      <td>${{ "{:,.0f}".format(revenue.annualized_impact) }}
+          (range ${{ "{:,.0f}".format(revenue.annualized_impact_low) }} to ${{ "{:,.0f}".format(revenue.annualized_impact_high) }})</td></tr>
   <tr><th>AOV (control / treatment)</th>
       <td>${{ "%.2f"|format(revenue.aov_control) }} / ${{ "%.2f"|format(revenue.aov_treatment) }}</td></tr>
 </table>
@@ -145,7 +143,7 @@ without inflating Type-I error from naive "peeking."</p>
 """
 
 
-def _classify_recommendation(freq_significant: bool, bayes_prob: float, sequential_decision: Optional[str]):
+def _classify_recommendation(freq_significant: bool, bayes_prob: float, sequential_decision: str | None):
     """Translate the analysis triplet into a single CRO recommendation."""
     if sequential_decision == "ship" or (freq_significant and bayes_prob >= 0.95):
         return ("SHIP TREATMENT", "green", "Statistical evidence is strong from at least two methods. Roll out.")
@@ -167,7 +165,7 @@ def render_report(
     bayes_result,
     revenue_result=None,
     sequential_result=None,
-    tool_version: str = "0.2.0",
+    tool_version: str = "0.3.0",
 ) -> str:
     """Render a full HTML report and return it as a string.
 
@@ -198,7 +196,7 @@ def render_report(
     return template.render(
         experiment_name=experiment_name,
         client_name=client_name,
-        generated_at=datetime.now().strftime("%Y-%m-%d %H:%M"),
+        generated_at=datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC"),
         freq=freq_result.to_dict(),
         bayes=bayes_result.to_dict(),
         revenue=revenue_result.to_dict() if revenue_result else None,
