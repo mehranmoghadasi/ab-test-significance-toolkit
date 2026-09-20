@@ -7,12 +7,12 @@
 ```
 Mockup — terminal + HTML report side-by-side (illustrative numbers)
 
-┌──────────────────────────────────────────────┐   ┌─────────────────────────────────────────┐
+┌──────────────────────────────────────────────┐   ┌────────────────────────────────────────┐
 │ $ abtest analyze --csv exp.csv \             │   │  A/B Test Report: Checkout CTA copy v1  │
-│        --treatment v1 --client "Acme Co."    │   │  ───────────────────────────────────    │
+│        --treatment v1 --client "Acme Co."    │   │  ─────────────────────────────────    │
 │                                              │   │  [ SHIP TREATMENT ]  Evidence is        │
 │ Summary — Checkout CTA copy v1               │   │  strong from at least two methods.      │
-│ ─────────────────────────────────────        │   │                                         │
+│ ───────────────────────────────────        │   │                                         │
 │  Control rate            3.96%               │   │  Control rate     3.96%                 │
 │  Treatment rate          4.54%               │   │  Treatment rate   4.54%                 │
 │  Relative lift          +14.65%              │   │  Relative lift   +14.65%                │
@@ -22,8 +22,8 @@ Mockup — terminal + HTML report side-by-side (illustrative numbers)
 │  Sequential decision     ship                │   │  ( range +$112,200 to +$384,600 )       │
 │  RPV diff           +$0.1035                 │   │                                         │
 │  Annualized impact  +$248,400                │   │  Always-valid p = 0.0091  | decision: ship
-│ ─────────────────────────────────────        │   │                                         │
-│ Report written: reports/acme_v1.html         │   └─────────────────────────────────────────┘
+│ ───────────────────────────────────        │   │                                         │
+│ Report written: reports/acme_v1.html         │   └────────────────────────────────────────┘
 └──────────────────────────────────────────────┘
 ```
 
@@ -209,5 +209,5 @@ relies on.
 
 ## About the Author
 
-**Mehran Moghadasi** — Digital Marketing & Brand Manager (SEO · Google Ads · Meta Ads · Social Media), Calgary, AB. 13+ years of agency and in-house experimentation across Google Ads, Meta Ads, GA4 and GTM.
+**Mehran Moghadasi** — Digital Marketing & Brand Manager (SEO · Google Ads · Meta Ads · Social Media), Calgary, AB.
 [github.com/mehranmoghadasi](https://github.com/mehranmoghadasi) · [linkedin.com/in/mehranmoghadasi](https://www.linkedin.com/in/mehranmoghadasi)
